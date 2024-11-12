@@ -1,0 +1,508 @@
+﻿VLSI 
+—------------------------------------------------------------------------------------------
+1. Shift Registers 
+
+
+Source code :--
+
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+
+-- Uncomment the following library declaration if using
+-- arithmetic functions with Signed or Unsigned values
+--use IEEE.NUMERIC_STD.ALL;
+
+
+-- Uncomment the following library declaration if instantiating
+-- any Xilinx leaf cells in this code.
+--library UNISIM;
+--use UNISIM.VComponents.all;
+
+
+entity Shift_registers is
+    Port ( clk : in STD_LOGIC;
+           reset : in STD_LOGIC;
+           mode : in STD_LOGIC_VECTOR (1 downto 0);
+           d_in : in STD_LOGIC_VECTOR (2 downto 0);--parallel in
+           s_in : in STD_LOGIC;--serial in
+           q_out : out STD_LOGIC_VECTOR (2 downto 0);--parallel out
+           s_out : out STD_LOGIC);--serial out
+end Shift_registers;
+
+
+architecture Behavioral of Shift_registers is
+signal q : STD_LOGIC_VECTOR(2 downto 0); -- Internal register
+begin
+    process(clk, reset)
+    begin
+        if reset = '1' then
+            q <= "000";
+        elsIF (clk = '1' AND clk' EVENT) then
+            case mode is
+         
+                when "00" => -- pipo
+                     q_out <= d_in;
+                when "01" => --siso
+                    q(2 downto 1) <= q(1 downto 0);
+                    q(0)<= s_in;
+                  s_out <= q(2);  
+                when "10" => -- sipo
+                    q(2 downto 1) <= q(1 downto 0);
+                    q(0)<= s_in;
+                    q_out <= q ;
+                 when "11" => --piso
+                    q(2 downto 1) <= q(1 downto 0);
+                    q(0)<= d_in(2);
+                    s_out <= q(2);  
+                when others =>
+                    q <= q; -- Default to no operation
+            end case;
+        end if;
+    end process;
+    q_out <= q; -- Output assignment
+end Behavioral;
+—------------------------------------------------------------------------------------------------------------------
+testbench code :-
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+
+entity tb_Shift_registers is
+end tb_Shift_registers;
+
+
+architecture Behavioral of tb_Shift_registers is
+
+
+    -- Component Declaration for the Unit Under Test (UUT)
+    component Shift_registers
+        Port (
+
+
+            clk     : in  STD_LOGIC;
+
+
+            reset   : in  STD_LOGIC;
+            mode    : in  STD_LOGIC_VECTOR(1 downto 0);
+            d_in    : in  STD_LOGIC_VECTOR(2 downto 0);
+            s_in    : in  STD_LOGIC;
+            q_out   : out STD_LOGIC_VECTOR(2 downto 0);
+             s_out    : in  std_logic
+        );
+    end component;
+
+
+    -- Testbench signals
+    signal clk     : STD_LOGIC := '0';
+    signal reset   : STD_LOGIC := '0';
+    signal mode    : STD_LOGIC_VECTOR(1 downto 0) := "00";
+    signal d_in    : STD_LOGIC_VECTOR(2 downto 0) := "000";
+    signal s_in    : STD_LOGIC := '0';
+    signal q_out   : STD_LOGIC_VECTOR(2 downto 0);
+     signal s_out    : STD_LOGIC;
+    -- Clock period definition
+
+
+   -- constant clk_period : time := 10 ns;
+
+
+begin
+    -- Instantiate the Unit Under Test (UUT)
+    uut:Shift_registers
+        Port map (
+            clk     => clk,
+            reset   => reset,
+            mode    => mode,
+            d_in    => d_in,
+            s_in    => s_in,
+           q_out   => q_out ,
+            s_out    => s_out);
+PROCESS (clk ,reset )
+Begin
+Reset <= '0' ;
+Reset <= '0' after 70ns ;
+Clk <= not clk after 20ns ;
+End process ;
+
+
+PROCESS
+begin
+d_in <= "101"; wait for 100ns;
+Mode <="00"; wait for 100ns;
+S_in <= '1'; wait for 100ns ;
+Mode <= "01"; wait for 100ns ;
+S_in <= '0';  wait for 100ns ;
+Mode <= "10" ; wait for 100ns ;
+d_in <= "110"; wait for 100ns;
+Mode <= "11" ; wait for 100ns ;
+end process;
+end Behavioral;
+—------------------------------------------------------------------------------------------------------------------
+
+
+2.Mod N Counter 4 Bit 
+
+
+
+
+Source code :-
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_arith.ALL;
+use IEEE.STD_LOGIC_unsigned.ALL;
+
+
+-- Uncomment the following library declaration if using
+-- arithmetic functions with Signed or Unsigned values
+--use IEEE.NUMERIC_STD.ALL;
+-- Uncomment the following library declaration if instantiating
+-- any Xilinx primitives in this code.
+--library UNISIM;
+--use UNISIM.VComponents.all;
+entity bitcounter is
+Port ( clk : in STD_LOGIC;
+clr : in STD_LOGIC;
+q : out STD_LOGIC_VECTOR (3 downto 0));
+end bitcounter;
+architecture Behavioral of bitcounter is
+signal tmp: std_logic_vector(3 downto 0);
+
+
+begin
+process (Clk, CLR)
+begin
+if (CLR='1') then
+tmp <= "0000";
+elsif (Clk'event and Clk='1') then
+tmp <= tmp + 1;
+end if;
+end process;
+Q <= tmp;
+end Behavioral;
+—----------------------------------------------------------------------------------------------------------------------------
+Test bench code:-
+LIBRARY ieee;
+USE ieee.std_logic_1164.ALL;
+-- Uncomment the following library declaration if using
+-- arithmetic functions with Signed or Unsigned values
+--USE ieee.numeric_std.ALL;
+ENTITY bitcounter_test IS
+END bitcounter_test;
+ARCHITECTURE behavior OF bitcounter_test IS
+-- Component Declaration for the Unit Under Test (UUT)
+COMPONENT bitcounter
+PORT(
+clk : IN std_logic;
+clr : IN std_logic;
+q : OUT std_logic_vector(3 downto 0)
+);
+END COMPONENT;
+
+
+--Inputs
+signal clk : std_logic := '0';
+signal clr : std_logic := '0';
+-- signal reset: std_logic:='0';
+--Outputs
+signal q : std_logic_vector(3 downto 0);
+-- Clock period definitions
+-- constant clk_period : time := 10 ns;
+BEGIN
+-- Instantiate the Unit Under Test (UUT)
+uut: bitcounter PORT MAP (
+clk => clk,
+clr => clr,
+q => q
+);
+
+
+-- Clock process definitions
+clock_process :process
+begin
+clk <= '0';
+wait for 10 ns;
+clk <= '1';
+wait for 10 ns;
+end process;
+
+
+-- Stimulus process
+stim_proc: process
+begin
+-- hold reset state for 100 ns.
+clr <= '0';
+wait for 50 ns;
+clr <= '1';
+wait for 50 ns;
+wait;
+end process;
+END;
+—------------------------------------------------------------------------------------------------------------------
+3.ALU
+Source code
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_arith.ALL;
+use IEEE.STD_LOGIC_unsigned.ALL;
+
+
+entity ALU is
+    Port ( a : in STD_LOGIC_VECTOR (3 downto 0);
+           b : in STD_LOGIC_VECTOR (3 downto 0);
+           s : in STD_LOGIC_VECTOR (2 downto 0);
+           y : out STD_LOGIC_VECTOR (3 downto 0));
+end ALU;
+
+
+architecture Behavioral of ALU is
+begin
+process(a,b,s)
+begin
+case s is
+when “000” => y <= a+b;
+when "001"=> y <=a-b;
+when "010"=> y <=a and b;
+when "011"=> y <=a nand b;
+when "100"=> y <=a xor b;
+when "101"=> y <=a xnor b;
+when "110"=> y <=a or b;
+when others=> y <=b-a;
+end case;
+end process;
+
+
+end Behavioral;
+
+
+
+
+* Testbench Code:
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+
+entity alu_tb is
+end alu_tb;
+
+
+architecture Behavioral of alu_tb is
+
+
+   -- Component Declaration for the Unit Under Test (UUT)
+ 
+    COMPONENT ALU
+    PORT(
+         a : IN std_logic_vector(3 downto 0);
+         b : IN std_logic_vector(3 downto 0);
+         s : IN std_logic_vector(2 downto 0);
+         y : OUT std_logic_vector(3 downto 0)
+        );
+    END COMPONENT;
+    
+
+
+   --Inputs
+   signal a : std_logic_vector(3 downto 0) := (others => '0');
+   signal b : std_logic_vector(3 downto 0) := (others => '0');
+   signal s : std_logic_vector(2 downto 0) := (others => '0');
+  --Outputs
+   signal y : std_logic_vector(3 downto 0);
+  --constant <clock>_period : time := 10 ns;
+ 
+BEGIN
+uut: ALU PORT MAP (
+ a => a,
+ b => b,
+ s => s,
+ y => y
+ );
+process
+   begin
+a<="0011" after 10 ns ;
+b<="0001" after 10 ns;
+wait for 100 ns;
+s<=”000”;
+wait for 50 ns;
+s<=”001”;
+wait for 50 ns;
+s<=”010”;
+wait for 50 ns;
+s<=”011”;
+wait for 50 ns;
+s<=”100”;
+wait for 50 ns;
+s<=”101”;
+wait for 50 ns;
+s<=”110”;
+wait for 50 ns;
+s<=”111”;
+wait for 100 ns;
+wait for 100 ns;
+end process;
+END;
+
+
+MIOT
+—----------------------------------------------------------------------------------------------------------------------------
+1. LED BLINKING
+
+
+// Define the LED pin
+const int ledPin = 13; 
+
+
+void setup() {
+  // Set the LED pin as an output
+  pinMode(ledPin, OUTPUT);
+}
+
+
+void loop() {
+  // Turn the LED on
+  digitalWrite(ledPin, HIGH);  
+  // Wait for 1 second (1000 milliseconds)
+  delay(1000);                
+  // Turn the LED off
+  digitalWrite(ledPin, LOW);   
+  // Wait for 1 second (1000 milliseconds)
+  delay(1000);                
+}
+
+
+—-----------------------------------------------------------—--------------------------------------------------------------
+2.Stepper motor
+#include <Stepper.h>
+
+
+const int stepsPerRevolution = 200;  // change this to fit the number of steps per revolution
+// for your motor
+
+
+// initialize the stepper library on pins 8 through 11:
+Stepper myStepper(stepsPerRevolution, 8, 9, 10, 11);
+
+
+void setup() {
+  // set the speed at 60 rpm:
+  myStepper.setSpeed(100);
+  // initialize the serial port:
+  Serial.begin(9600);
+}
+
+
+void loop() {
+  // step one revolution  in one direction:
+  Serial.println("clockwise");
+  myStepper.step(stepsPerRevolution);
+  delay(500);
+
+
+  // step one revolution in the other direction:
+  Serial.println("counterclockwise");
+  myStepper.step(-stepsPerRevolution);
+  delay(500);
+}
+
+
+—----------------------------------------------------------------------------------------------------------------------------
+3.DHT11
+#include "DHT.h"
+
+
+// Define the pin where the DHT11 is connected
+#define DHTPIN 2 // Change to the digital pin you connected the data pin to
+
+
+// Define the DHT type
+#define DHTTYPE DHT11 // DHT11 sensor model
+
+
+// Initialize the DHT sensor
+DHT dht(DHTPIN, DHTTYPE);
+
+
+void setup() {
+  // Start serial communication for debugging
+  Serial.begin(9600);
+  Serial.println("DHT11 test!");
+
+
+  // Begin DHT sensor
+  dht.begin();
+}
+
+
+void loop() {
+  // Wait a few seconds between measurements
+  delay(2000);
+
+
+  // Reading temperature and humidity
+  float humidity = dht.readHumidity();
+  float temperature = dht.readTemperature();
+
+
+  // Check if any reads failed
+  if (isnan(humidity) || isnan(temperature)) {
+    Serial.println("Failed to read from DHT sensor!");
+    return;
+  }
+
+
+  // Print readings to the Serial Monitor
+  Serial.print("Humidity: ");
+  Serial.print(humidity);
+  Serial.print(" %\t");
+  Serial.print("Temperature: ");
+  Serial.print(temperature);
+  Serial.println(" °C");
+}
+—----------------------------------------------------------------------------------------------------------------------------
+4.Relay module
+
+
+void setup() {
+  // initialize digital pin LED_BUILTIN as an output.
+  pinMode(LED_BUILTIN, OUTPUT);
+}
+
+
+// the loop function runs over and over again forever
+void loop() {
+  digitalWrite(LED_BUILTIN, HIGH);  // turn the LED on (HIGH is the voltage level)
+  delay(1000);                      // wait for a second
+  digitalWrite(LED_BUILTIN, LOW);   // turn the LED off by making the voltage LOW
+  delay(1000);                      // wait for a second
+}
+—--------------------------------------------------------------------------------------------------------------------------
+5. Bluetooth Module
+int led = 13;
+int data;
+
+
+void setup(){
+    Serial.begin(9600);
+    pinMode(13, OUTPUT);
+}
+
+
+void loop(){
+    while(serial.available() > 0)
+    {
+        data = Serial.read();
+        
+        Serial.println(data);
+        
+        if(data == 'A')
+        {
+            digitalWrite(13, HIGH);
+        }
+        
+        if(data == 'B')
+        {
+            digitalWrite(13, LOW);
+        }
+    }
+}

@@ -1,0 +1,43 @@
+
+#include "DHT.h"
+
+// Define the pin where the DHT11 is connected
+#define DHTPIN 2 // Change to the digital pin you connected the data pin to
+
+// Define the DHT type
+#define DHTTYPE DHT11 // DHT11 sensor model
+
+// Initialize the DHT sensor
+DHT dht(DHTPIN, DHTTYPE);
+
+void setup() {
+  // Start serial communication for debugging
+  Serial.begin(9600);
+  Serial.println("DHT11 test!");
+
+  // Begin DHT sensor
+  dht.begin();
+}
+
+void loop() {
+  // Wait a few seconds between measurements
+  delay(2000);
+
+  // Reading temperature and humidity
+  float humidity = dht.readHumidity();
+  float temperature = dht.readTemperature();
+
+  // Check if any reads failed
+  if (isnan(humidity) || isnan(temperature)) {
+    Serial.println("Failed to read from DHT sensor!");
+    return;
+  }
+
+  // Print readings to the Serial Monitor
+  Serial.print("Humidity: ");
+  Serial.print(humidity);
+  Serial.print(" %\t");
+  Serial.print("Temperature: ");
+  Serial.print(temperature);
+  Serial.println(" °C");
+}

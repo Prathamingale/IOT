@@ -1,0 +1,83 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_arith.ALL;
+use IEEE.STD_LOGIC_unsigned.ALL;
+-- Uncomment the following library declaration if using
+-- arithmetic functions with Signed or Unsigned values
+--use IEEE.NUMERIC_STD.ALL;
+-- Uncomment the following library declaration if instantiating
+-- any Xilinx primitives in this code.
+--library UNISIM;
+--use UNISIM.VComponents.all;
+entity Fourbitupdowncounter is
+Port ( clk : in STD_LOGIC;
+clr : in STD_LOGIC;
+q : out STD_LOGIC_VECTOR (3 downto 0));
+end Fourbitupdowncounter;
+architecture Behavioral of Fourbitupdowncounter is
+signal tmp: std_logic_vector(3 downto 0);
+begin
+process (Clk, CLR)
+begin
+if (CLR='1') then
+tmp <= "0000";
+elsif (Clk'event and Clk='1') then
+tmp <= tmp + 1; -- for down counter (-)
+end if;
+end process;
+Q <= tmp;
+end Behavioral;
+
+
+
+----------
+test bench
+LIBRARY ieee;
+USE ieee.std_logic_1164.ALL;
+-- Uncomment the following library declaration if using
+-- arithmetic functions with Signed or Unsigned values
+--USE ieee.numeric_std.ALL;
+ENTITY fourbitupdowncounter_tb IS
+END fourbitupdowncounter_tb;
+ARCHITECTURE behavior OF fourbitupdowncounter_tb IS
+-- Component Declaration for the Unit Under Test (UUT)
+COMPONENT Fourbitupdowncounter
+PORT(
+clk : IN std_logic;
+clr : IN std_logic;
+q : OUT std_logic_vector(3 downto 0)
+);
+END COMPONENT;
+--Inputs
+signal clk : std_logic := '0';
+signal clr : std_logic := '0';
+-- signal reset: std_logic:='0';
+--Outputs
+signal q : std_logic_vector(3 downto 0);
+-- Clock period definitions
+-- constant clk_period : time := 10 ns;
+BEGIN
+-- Instantiate the Unit Under Test (UUT)
+uut: Fourbitupdowncounter PORT MAP (
+clk => clk,
+clr => clr,
+q => q
+);
+-- Clock process definitions
+clock_process :process
+begin
+clk <= '0';
+wait for 10 ns;
+clk <= '1';
+wait for 10 ns;
+end process;
+-- Stimulus process
+stim_proc: process
+begin
+-- hold reset state for 100 ns.
+clr <= '1';
+wait for 20 ns;
+clr <= '0';
+wait;
+end process;
+END;

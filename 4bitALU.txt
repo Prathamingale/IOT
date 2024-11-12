@@ -1,0 +1,114 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_arith.ALL;
+use IEEE.STD_LOGIC_unsigned.ALL;
+
+entity ALU is
+    Port ( a : in STD_LOGIC_VECTOR (3 downto 0);
+           b : in STD_LOGIC_VECTOR (3 downto 0);
+           s : in STD_LOGIC_VECTOR (2 downto 0);
+           y : out STD_LOGIC_VECTOR (3 downto 0));
+end ALU;
+
+architecture Behavioral of ALU is
+begin
+process(a,b,s)
+begin
+case s is
+when “000” => y <= a+b;
+when "001"=> y <=a-b;
+when "010"=> y <=a and b;
+when "011"=> y <=a nand b;
+when "100"=> y <=a xor b;
+when "101"=> y <=a xnor b;
+when "110"=> y <=a or b;
+when others=> y <=b-a;
+end case;
+end process;
+
+end Behavioral;
+
+
+
+-------
+test bench
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity alu_tb is
+end alu_tb;
+
+architecture Behavioral of alu_tb is
+
+   -- Component Declaration for the Unit Under Test (UUT)
+ 
+    COMPONENT ALU
+    PORT(
+         a : IN std_logic_vector(3 downto 0);
+         b : IN std_logic_vector(3 downto 0);
+         s : IN std_logic_vector(2 downto 0);
+         y : OUT std_logic_vector(3 downto 0)
+        );
+    END COMPONENT;
+    
+
+   --Inputs
+   signal a : std_logic_vector(3 downto 0) := (others => '0');
+   signal b : std_logic_vector(3 downto 0) := (others => '0');
+   signal s : std_logic_vector(2 downto 0) := (others => '0');
+  --Outputs
+   signal y : std_logic_vector(3 downto 0);
+  --constant <clock>_period : time := 10 ns;
+ 
+BEGIN
+uut: ALU PORT MAP (
+ a => a,
+ b => b,
+ s => s,
+ y => y
+ );
+process
+   begin
+a<="0011" after 10 ns ;
+b<="0001" after 10 ns;
+wait for 100 ns;
+s<=”000”;
+wait for 50 ns;
+s<=”001”;
+wait for 50 ns;
+s<=”010”;
+wait for 50 ns;
+s<=”011”;
+wait for 50 ns;
+s<=”100”;
+wait for 50 ns;
+s<=”101”;
+wait for 50 ns;
+s<=”110”;
+wait for 50 ns;
+s<=”111”;
+wait for 100 ns;
+wait for 100 ns;
+end process;
+END;
+
+
+
+
+------
+constarints
+set_property PACKAGE_PIN F22 [get_ports {a[0]}]; # "SW0"
+set_property IOSTANDARD LVCMOS33 [get_ports {a[0]}]
+set_property PACKAGE_PIN G22 [get_ports {a[1]}]; # "SW1"
+set_property IOSTANDARD LVCMOS33 [get_ports {a[1]}]
+set_property PACKAGE_PIN H22 [get_ports {b[0]}]; # "SW2"
+set_property IOSTANDARD LVCMOS33 [get_ports {b[0]}]
+set_property PACKAGE_PIN F21 [get_ports {b[1]}]; # "SW3"
+set_property IOSTANDARD LVCMOS33 [get_ports {b[1]}]
+set_property PACKAGE_PIN H19 [get_ports {s}]; # "SW4"
+set_property IOSTANDARD LVCMOS33 [get_ports {s}]
+set_property PACKAGE_PIN T21 [get_ports {y[0]}]
+set_property IOSTANDARD LVCMOS33 [get_ports y[0]]
+set_property PACKAGE_PIN T22 [get_ports {y[1]}]; # "LD1"
+set_property IOSTANDARD LVCMOS33 [get_ports y[1]]

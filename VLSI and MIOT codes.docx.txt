@@ -1,0 +1,556 @@
+﻿VLSI
+EXP 1- ALU
+* Source Code:
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_arith.ALL;
+use IEEE.STD_LOGIC_unsigned.ALL;
+
+
+entity ALU is
+    Port ( a : in STD_LOGIC_VECTOR (3 downto 0);
+           b : in STD_LOGIC_VECTOR (3 downto 0);
+           s : in STD_LOGIC_VECTOR (2 downto 0);
+           y : out STD_LOGIC_VECTOR (3 downto 0));
+end ALU;
+
+
+architecture Behavioral of ALU is
+begin
+process(a,b,s)
+begin
+case s is
+when “000” => y <= a+b;
+when "001"=> y <=a-b;
+when "010"=> y <=a and b;
+when "011"=> y <=a nand b;
+when "100"=> y <=a xor b;
+when "101"=> y <=a xnor b;
+when "110"=> y <=a or b;
+when others=> y <=b-a;
+end case;
+end process;
+
+
+end Behavioral;
+
+
+
+
+* Testbench Code:
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+
+entity alu_tb is
+end alu_tb;
+
+
+architecture Behavioral of alu_tb is
+
+
+   -- Component Declaration for the Unit Under Test (UUT)
+ 
+    COMPONENT ALU
+    PORT(
+         a : IN std_logic_vector(3 downto 0);
+         b : IN std_logic_vector(3 downto 0);
+         s : IN std_logic_vector(2 downto 0);
+         y : OUT std_logic_vector(3 downto 0)
+        );
+    END COMPONENT;
+    
+
+
+   --Inputs
+   signal a : std_logic_vector(3 downto 0) := (others => '0');
+   signal b : std_logic_vector(3 downto 0) := (others => '0');
+   signal s : std_logic_vector(2 downto 0) := (others => '0');
+  --Outputs
+   signal y : std_logic_vector(3 downto 0);
+  --constant <clock>_period : time := 10 ns;
+ 
+BEGIN
+uut: ALU PORT MAP (
+ a => a,
+ b => b,
+ s => s,
+ y => y
+ );
+process
+   begin
+a<="0011" after 10 ns ;
+b<="0001" after 10 ns;
+wait for 100 ns;
+s<=”000”;
+wait for 50 ns;
+s<=”001”;
+wait for 50 ns;
+s<=”010”;
+wait for 50 ns;
+s<=”011”;
+wait for 50 ns;
+s<=”100”;
+wait for 50 ns;
+s<=”101”;
+wait for 50 ns;
+s<=”110”;
+wait for 50 ns;
+s<=”111”;
+wait for 100 ns;
+wait for 100 ns;
+end process;
+END;
+
+
+* Constraints
+set_property PACKAGE_PIN F22 [get_ports {a[0]}]; # "SW0"
+set_property IOSTANDARD LVCMOS33 [get_ports {a[0]}]
+set_property PACKAGE_PIN G22 [get_ports {a[1]}]; # "SW1"
+set_property IOSTANDARD LVCMOS33 [get_ports {a[1]}]
+set_property PACKAGE_PIN H22 [get_ports {b[0]}]; # "SW2"
+set_property IOSTANDARD LVCMOS33 [get_ports {b[0]}]
+set_property PACKAGE_PIN F21 [get_ports {b[1]}]; # "SW3"
+set_property IOSTANDARD LVCMOS33 [get_ports {b[1]}]
+set_property PACKAGE_PIN H19 [get_ports {s}]; # "SW4"
+set_property IOSTANDARD LVCMOS33 [get_ports {s}]
+set_property PACKAGE_PIN T21 [get_ports {y[0]}]
+set_property IOSTANDARD LVCMOS33 [get_ports y[0]]
+set_property PACKAGE_PIN T22 [get_ports {y[1]}]; # "LD1"
+set_property IOSTANDARD LVCMOS33 [get_ports y[1]]
+
+
+
+
+EXP 2- Shift Register
+* source code for shift register
+
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_ARITH.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+
+entity UniversalShiftRegister is
+    Port (
+        clk     : in  STD_LOGIC;
+        reset   : in  STD_LOGIC;
+        mode    : in  STD_LOGIC_VECTOR(1 downto 0); -- Mode selection
+        d_in    : in  STD_LOGIC_VECTOR(2 downto 0); -- Parallel input
+        s_in    : in  STD_LOGIC;                    -- Serial input for shifts
+        q_out   : out STD_LOGIC_VECTOR(2 downto 0)  -- Output
+    );
+end UniversalShiftRegister;
+
+
+architecture Behavioral of UniversalShiftRegister is
+    signal q : STD_LOGIC_VECTOR(2 downto 0); -- Internal register
+begin
+    process(clk, reset)
+    begin
+        if reset = '1' then
+            q <= "000";
+        elsIF (clk = '1' AND clk' EVENT) then
+            case mode is
+
+
+                when "00" => -- No operation
+                    q <= q;
+                when "01" => -- Shift left
+                    q <= q(1 downto 0) & s_in;
+                when "10" => -- Shift right
+                    q <= s_in & q(2 downto 1);
+                when "11" => -- Parallel load
+                    q <= d_in;
+                when others =>
+                    q <= q; -- Default to no operation
+            end case;
+        end if;
+    end process;
+    q_out <= q; -- Output assignment
+end Behavioral;
+
+
+
+
+* Test bench code for Shift Reg:-
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+
+entity tb_UniversalShiftRegister is
+end tb_UniversalShiftRegister;
+
+
+architecture Behavioral of tb_UniversalShiftRegister is
+
+
+    -- Component Declaration for the Unit Under Test (UUT)
+    component UniversalShiftRegister
+        Port (
+
+
+            clk     : in  STD_LOGIC;
+
+
+            reset   : in  STD_LOGIC;
+            mode    : in  STD_LOGIC_VECTOR(1 downto 0);
+            d_in    : in  STD_LOGIC_VECTOR(2 downto 0);
+            s_in    : in  STD_LOGIC;
+            q_out   : out STD_LOGIC_VECTOR(2 downto 0)
+        );
+    end component;
+
+
+    -- Testbench signals
+    signal clk     : STD_LOGIC := '0';
+    signal reset   : STD_LOGIC := '0';
+    signal mode    : STD_LOGIC_VECTOR(1 downto 0) := "00";
+    signal d_in    : STD_LOGIC_VECTOR(2 downto 0) := "000";
+    signal s_in    : STD_LOGIC := '0';
+    signal q_out   : STD_LOGIC_VECTOR(2 downto 0);
+
+
+    -- Clock period definition
+
+
+   -- constant clk_period : time := 10 ns;
+
+
+begin
+    -- Instantiate the Unit Under Test (UUT)
+    uut: UniversalShiftRegister
+        Port map (
+            clk     => clk,
+            reset   => reset,
+            mode    => mode,
+            d_in    => d_in,
+            s_in    => s_in,
+           q_out   => q_out );
+PROCESS (clk ,reset )
+Begin 
+Reset <= '0' ;
+Reset <= '0' after 70ns ;
+Clk <= not clk after 20ns ;
+End process ;
+
+
+PROCESS 
+begin 
+d_in <= "101"; wait for 100ns;
+Mode <="00"; wait for 100ns;
+Mode <= "01"; wait for 100ns ;
+Mode <= "10" ; wait for 100ns ;
+S_in <= '1'; wait for 100ns ; -- Shift left mode
+Mode <= "11" ; wait for 100ns ;
+S_in <= '0';  wait for 100ns ; -- Shift right mode
+end process;
+end Behavioral;
+* Constraint for Shift Reg
+
+
+set_property PACKAGE_PIN F22 [get_ports {mode[0]}]; # "SW0"
+set_property IOSTANDARD LVCMOS33 [get_ports {mode[0]}]
+set_property PACKAGE_PIN G22 [get_ports {mode[1]}]; # "SW1"
+set_property IOSTANDARD LVCMOS33 [get_ports {mode[1]}]
+set_property PACKAGE_PIN H22 [get_ports {d_in[0]}]; # "SW2"
+set_property IOSTANDARD LVCMOS33 [get_ports {d_in[0]}]
+set_property PACKAGE_PIN F21 [get_ports {d_in[1]}]; # "SW3"
+set_property IOSTANDARD LVCMOS33 [get_ports {d_in[1]}]
+set_property PACKAGE_PIN H19 [get_ports {d_in[2]}]; # "SW4"
+set_property IOSTANDARD LVCMOS33 [get_ports {d_in[2]}]
+set_property PACKAGE_PIN H18 [get_ports {s_in}]; # "SW5"
+set_property IOSTANDARD LVCMOS33 [get_ports {s_in}]
+set_property PACKAGE_PIN T22 [get_ports {q_out[0]}];  #"LD0"
+set_property IOSTANDARD LVCMOS33 [get_ports q_out[0]]
+set_property PACKAGE_PIN T21 [get_ports {q_out[1]}]; # "LD1"
+set_property IOSTANDARD LVCMOS33 [get_ports q_out[1]]
+set_property PACKAGE_PIN U22 [get_ports {q_out[2]}]; # "LD2"
+set_property IOSTANDARD LVCMOS33 [get_ports q_out[2]]
+3RD :-- MOD-N counter 
+
+
+* Source code 
+
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_ARITH.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+
+entity mod_n_counter is
+    Port ( clk   : in STD_LOGIC;
+           reset : in STD_LOGIC;
+           mode  : in STD_LOGIC;  -- '1' for up counting, '0' for down counting
+           en    : in STD_LOGIC;  -- Enable counting
+           Qout  : out STD_LOGIC_VECTOR (3 downto 0)  -- 4-bit output
+         );
+end mod_n_counter;
+
+
+architecture Behavioral of mod_n_counter is
+
+
+    -- Internal signal for the counter value
+    signal counter : STD_LOGIC_VECTOR (3 downto 0) := "0000";
+    constant N : integer := 16;  -- Mod-16 counter (can change for different Mod-N values)
+
+
+begin
+
+
+    -- Process to handle the counter behavior
+    process(clk, reset)
+    begin
+        if reset = '1' then
+            -- Asynchronous reset: clear counter to 0
+            counter <= "0000";
+        elsif rising_edge(clk) then
+            if en = '1' then
+                -- Counting logic: up or down depending on mode
+                if mode = '1' then  -- Up counting
+                    if counter = N-1 then
+                        counter <= "0000";  -- Wrap around
+                    else
+                        counter <= counter + 1;
+                    end if;
+                else  -- Down counting
+                    if counter = "0000" then
+                        counter <= std_logic_vector(to_unsigned(N-1, 4));
+                        counter <= counter - 1;
+                    end if;
+                end if;
+            end if;
+        end if;
+    end process;
+
+
+    -- Assign counter value to output
+    Qout <= counter;
+
+
+end Behavioral;
+
+
+* Testbench
+
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_ARITH.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+
+entity tb_mod_n_counter is
+    -- Testbench does not have any ports
+end tb_mod_n_counter;
+
+
+architecture behavior of tb_mod_n_counter is
+    -- Component declaration of the mod_n_counter
+    component mod_n_counter
+        Port ( clk   : in STD_LOGIC;
+               reset : in STD_LOGIC;
+               mode  : in STD_LOGIC;
+               en    : in STD_LOGIC;
+               Qout  : out STD_LOGIC_VECTOR (3 downto 0)
+             );
+    end component;
+
+
+    -- Signals to connect to the mod_n_counter
+    signal clk_tb   : STD_LOGIC := '0';
+    signal reset_tb : STD_LOGIC := '0';
+    signal mode_tb  : STD_LOGIC := '1';  -- '1' for up counting
+    signal en_tb    : STD_LOGIC := '1';
+    signal Qout_tb  : STD_LOGIC_VECTOR(3 downto 0);
+
+
+    -- Clock period
+    constant clk_period : time := 10 ns;
+
+
+begin
+    -- Instantiate the mod_n_counter component
+    uut: mod_n_counter port map (
+        clk   => clk_tb,
+        reset => reset_tb,
+        mode  => mode_tb,
+        en    => en_tb,
+        Qout  => Qout_tb
+    );
+
+
+    -- Clock generation process
+    clk_process : process
+    begin
+        clk_tb <= '0';
+        wait for clk_period / 2;
+        clk_tb <= '1';
+        wait for clk_period / 2;
+    end process;
+
+
+    -- Stimulus process (Test Cases)
+    stim_proc: process
+    begin
+        -- Test Case 1: Reset the counter
+        reset_tb <= '1';
+        wait for clk_period * 2;  -- Hold reset for 2 clock cycles
+        reset_tb <= '0';
+        wait for clk_period;
+
+
+        -- Test Case 2: Count up for 10 cycles
+        for i in 0 to 10 loop
+            wait for clk_period;
+        end loop;
+
+
+        -- Test Case 3: Change mode to down counting and count down
+        mode_tb <= '0';  -- Down counting
+        wait for clk_period;
+        for i in 0 to 10 loop
+            wait for clk_period;
+        end loop;
+
+
+        -- Test Case 4: Disable counter (en = '0')
+        en_tb <= '0';
+        wait for clk_period * 5;
+        -- Test Case 5: Re-enable counter (en = '1') and continue counting up
+        en_tb <= '1';
+        mode_tb <= '1';  -- Up counting
+        wait for clk_period * 5;
+        -- End the simulation
+        assert false report "Test completed successfully!" severity note;
+        wait;
+    end process;
+end behavior;
+IOT
+DHT11
+#include "DHT.h"
+
+
+// Define the pin where the DHT11 is connected
+#define DHTPIN 2 // Change to the digital pin you connected the data pin to
+
+
+// Define the DHT type
+#define DHTTYPE DHT11 // DHT11 sensor model
+
+
+// Initialize the DHT sensor
+DHT dht(DHTPIN, DHTTYPE);
+
+
+void setup() {
+  // Start serial communication for debugging
+  Serial.begin(9600);
+  Serial.println("DHT11 test!");
+
+
+  // Begin DHT sensor
+  dht.begin();
+}
+
+
+void loop() {
+  // Wait a few seconds between measurements
+  delay(2000);
+
+
+  // Reading temperature and humidity
+  float humidity = dht.readHumidity();
+  float temperature = dht.readTemperature();
+
+
+  // Check if any reads failed
+  if (isnan(humidity) || isnan(temperature)) {
+    Serial.println("Failed to read from DHT sensor!");
+    return;
+  }
+
+
+  // Print readings to the Serial Monitor
+  Serial.print("Humidity: ");
+  Serial.print(humidity);
+  Serial.print(" %\t");
+  Serial.print("Temperature: ");
+  Serial.print(temperature);
+  Serial.println(" °C");
+}
+
+
+---------------------------------------------------------------------------------------------------------
+LED
+void setup() {
+  // initialize digital pin LED_BUILTIN as an output.
+  pinMode(LED_BUILTIN, OUTPUT);
+}
+
+
+// the loop function runs over and over again forever
+void loop() {
+  digitalWrite(LED_BUILTIN, HIGH);  // turn the LED on (HIGH is the voltage level)
+  delay(1000);                      // wait for a second
+  digitalWrite(LED_BUILTIN, LOW);   // turn the LED off by making the voltage LOW
+  delay(1000);                      // wait for a second
+}
+
+
+Stepper Motor
+
+
+#include <Stepper.h>
+
+
+const int stepsPerRevolution = 200;  // change this to fit the number of steps per revolution
+// for your motor
+
+
+// initialize the stepper library on pins 8 through 11:
+Stepper myStepper(stepsPerRevolution, 8, 9, 10, 11);
+
+
+void setup() {
+  // set the speed at 60 rpm:
+  myStepper.setSpeed(100);
+  // initialize the serial port:
+  Serial.begin(9600);
+}
+
+
+void loop() {
+  // step one revolution  in one direction:
+  Serial.println("clockwise");
+  myStepper.step(stepsPerRevolution);
+  delay(500);
+
+
+  // step one revolution in the other direction:
+  Serial.println("counterclockwise");
+  myStepper.step(-stepsPerRevolution);
+  delay(500);
+}
+
+
+Relay Module 
+
+
+void setup() {
+  // initialize digital pin LED_BUILTIN as an output.
+  pinMode(LED_BUILTIN, OUTPUT);
+}
+
+
+// the loop function runs over and over again forever
+void loop() {
+  digitalWrite(LED_BUILTIN, HIGH);  // turn the LED on (HIGH is the voltage level)
+  delay(1000);                      // wait for a second
+  digitalWrite(LED_BUILTIN, LOW);   // turn the LED off by making the voltage LOW
+  delay(1000);                      // wait for a second
+}
